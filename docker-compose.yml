@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    command: uvicorn demo.api:app --host 0.0.0.0 --port 8000
+    ports: ["8000:8000"]
+  ui:
+    build: .
+    command: streamlit run demo/app.py --server.port=7860 --server.address=0.0.0.0
+    environment:
+      - API_URL=http://api:8000
+    ports: ["7860:7860"]
+    depends_on: [api]
