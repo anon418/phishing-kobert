@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+logs/
+*.pt
+*.bin
+models/
+data/processed/
+data/interim/
+*.ipynb_checkpoints
