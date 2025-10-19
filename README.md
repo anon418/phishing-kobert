@@ -86,13 +86,13 @@ volumes:
 
 ### `POST /predict` (예시)
 
-Request:
+**Request**
 
 ```json
 {"text":"국민은행 인증이 만료되었습니다. 링크에서 재인증하세요.","threshold":0.5}
 ```
 
-Response:
+**Response**
 
 ```json
 {"prob_lm":0.82,"score_rule":0.67,"score_fused":0.77,"decision":"phishing","abstained":false,"masked_text":"○○은행 인증이 만료되었습니다. 링크에서 재인증하세요.","intents":["credential-harvest","banking"]}
