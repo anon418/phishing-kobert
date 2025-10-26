@@ -8,3 +8,4 @@ data/processed/
 data/interim/
 *.ipynb_checkpoints
 .env
+data/interim/
