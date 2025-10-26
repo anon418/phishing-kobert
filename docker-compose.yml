@@ -1,13 +1,34 @@
-version: "3.9"
 services:
   api:
-    build: .
-    command: uvicorn demo.api:app --host 0.0.0.0 --port 8000
+    image: ghcr.io/anon418/phishing-kobert:latest
+    # 로컬에서 직접 빌드하고 싶다면 위 image 대신 아래 활성화:
+    # build: .
     ports: ["8000:8000"]
+    environment:
+      - PYTHONPATH=/app
+      - HF_HOME=/cache/hf
+      - THRESHOLD=0.5
+      - ABSTAIN_BAND=0.05
+      - FUSION_LM=0.7
+      - FUSION_RULE=0.3
+      - TEMP=1.0
+      - MODEL_NAME=klue/roberta-base   # 학습 ckpt 준비되면 /app/models/current 로 교체
+    volumes:
+      - phish_hf:/cache/hf
+      - ./models:/app/models
+      - ./:/app
+    command: uvicorn demo.api:app --host 0.0.0.0 --port 8000 --log-level debug
+
   ui:
-    build: .
-    command: streamlit run demo/app.py --server.port=7860 --server.address=0.0.0.0
+    image: ghcr.io/anon418/phishing-kobert:latest
+    # build: .
+    depends_on: [api]
     environment:
       - API_URL=http://api:8000
     ports: ["7860:7860"]
-    depends_on: [api]
+    volumes:
+      - ./:/app
+    command: bash -lc 'streamlit run demo/app.py --server.port=7860 --server.address=0.0.0.0'
+
+volumes:
+  phish_hf:

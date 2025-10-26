@@ -1,30 +1,38 @@
-import os, requests, streamlit as st
+import os
+import requests
+import streamlit as st
+
 API = os.getenv("API_URL", "http://localhost:8000")
 
-st.set_page_config(page_title="KoBERT 피싱 탐지", layout="centered")
+st.set_page_config(page_title="KoBERT 피싱 탐지 — Demo", layout="centered")
 st.title("KoBERT 피싱 탐지 — Demo v0.2")
 
-txt = st.text_area("문장 입력", height=140, placeholder="예) [Web발신] 긴급! 계정이용중지. 아래 링크로 본인인증 http://ph1sh.me")
-c1, c2 = st.columns(2)
-thr = c1.slider("임계치(Threshold)", 0.1, 0.9, 0.5, 0.01)
-band = c2.slider("보류 밴드(±)", 0.0, 0.2, 0.05, 0.01)
+txt = st.text_area("문장 입력", height=160,
+                   placeholder="예) [Web발신] 긴급! 계정이용중지. 아래 링크로 본인인증 http://ph1sh.me")
 
-b1, b2 = st.columns(2)
-with b1:
+thr = st.slider("임계치(Threshold)", 0.0, 1.0, 0.50, 0.01)
+band = st.slider("보류 밴드(±)", 0.0, 0.30, 0.05, 0.01)
+
+c1, c2 = st.columns(2)
+
+with c1:
     if st.button("분석"):
         if not txt.strip():
             st.warning("문장을 입력해주세요.")
         else:
-            r = requests.post(f"{API}/predict", json={"text": txt, "threshold": thr, "abstain_band": band}, timeout=30)
-            data = r.json()
-            # 상단 배지로 요약
-            st.markdown(f"**결정:** `{data['decision']}`  |  **prob:** {data['prob']}  (bert:{data['bert_prob']}, rule:{data['rule_prob']})")
-            if data["abstain"]:
-                st.warning("판단 보류(abstain): 애매한 케이스입니다. 사람이 리뷰하세요.")
-            st.json(data)
+            try:
+                r = requests.post(f"{API}/predict",
+                                  json={"text": txt, "threshold": thr, "abstain_band": band},
+                                  timeout=60)
+                st.json(r.json())
+            except Exception as e:
+                st.error(f"API 요청 실패: {e}")
 
-with b2:
+with c2:
     if st.button("상태"):
-        st.json(requests.get(f"{API}/health", timeout=10).json())
+        try:
+            st.json(requests.get(f"{API}/health", timeout=10).json())
+        except Exception as e:
+            st.error(f"헬스체크 실패: {e}")
 
-st.caption("※ 현재 모델은 데모용. KoBERT 파인튜닝 모델로 교체 시 prob/의도 정확도가 상승합니다. 로그는 PII 마스킹 후 저장 예정.")
+st.caption("※ 현재 모델은 데모용. 파인튜닝 체크포인트 연결 시 정확도가 향상됩니다. 로그는 PII 마스킹 후 저장 예정.")
