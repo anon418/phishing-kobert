@@ -14,3 +14,4 @@
 
 
 약라벨 통계(미니셋): total=X, pos=Y, neg=Z
+- Sweep top: TH=0.45, LM_W=0.5/RULE_W=0.5 (미니셋 기준, 참조용)
